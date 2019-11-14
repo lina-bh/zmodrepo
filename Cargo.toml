@@ -1,0 +1,14 @@
+[package]
+name = "zrepomod"
+version = "0.1.0"
+edition = "2018"
+
+[lib]
+name = "repomod"
+crate-type = ["dylib"]
+
+[dependencies]
+failure = "0.1.6"
+
+[build-dependencies]
+bindgen = "^0.51"

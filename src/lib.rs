@@ -38,7 +38,7 @@ thread_local! {
 pub extern "C" fn rustexample(
     nam: *const c_char,
     args: *const *const c_char,
-    opts: *mut zsh::options,
+    opts: *const zsh::options,
     _func: c_int,
 ) -> c_int {
     println!("hello from rust!");
@@ -46,13 +46,13 @@ pub extern "C" fn rustexample(
 }
 
 #[no_mangle]
-pub extern "C" fn setup_(_m: *mut zsh::module) -> c_int {
+pub extern "C" fn setup_(_m: *const zsh::module) -> c_int {
     println!("zrepomod loaded");
     0
 }
 
 #[no_mangle]
-pub extern "C" fn features_(m: *mut zsh::module, features: *mut *mut *mut c_char) -> c_int {
+pub extern "C" fn features_(m: *const zsh::module, features: *mut *const *const c_char) -> c_int {
     MODULE_FEATURES.with(|module_features| {
         unsafe { *features = zsh::featuresarray(m, module_features.as_ptr()) };
     });
@@ -61,26 +61,26 @@ pub extern "C" fn features_(m: *mut zsh::module, features: *mut *mut *mut c_char
 }
 
 #[no_mangle]
-pub extern "C" fn enables_(m: *mut zsh::module, enables: *mut *mut c_int) -> c_int {
+pub extern "C" fn enables_(m: *const zsh::module, enables: *mut *mut c_int) -> c_int {
     MODULE_FEATURES.with(|module_features| unsafe {
         zsh::handlefeatures(m, module_features.as_ptr(), enables)
     })
 }
 
 #[no_mangle]
-pub extern "C" fn boot_(m: *mut zsh::module) -> c_int {
+pub extern "C" fn boot_(m: *const zsh::module) -> c_int {
     0
 }
 
 #[no_mangle]
-pub extern "C" fn cleanup_(m: *mut zsh::module) -> c_int {
+pub extern "C" fn cleanup_(m: *const zsh::module) -> c_int {
     MODULE_FEATURES.with(|module_features| unsafe {
         zsh::setfeatureenables(m, module_features.as_ptr(), ptr::null_mut())
     })
 }
 
 #[no_mangle]
-pub extern "C" fn finish_(_m: *mut zsh::module) -> c_int {
+pub extern "C" fn finish_(_m: *const zsh::module) -> c_int {
     // MODULE_FEATURES.with(|module_features| mem::drop(module_features.into_inner()));
     BUILTINS.with(|builtins| {
         builtins.borrow_mut().drain(0..).for_each(|builtin| unsafe {
